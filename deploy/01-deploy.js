@@ -5,7 +5,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   const { deployer } = await getNamedAccounts();
   const chainId = network.config.chainId;
 
-  const hardhatBasicsNFT = await deploy("HardhatBasicsNFT", {
+  const vulnerableContract = await deploy("Attacker", {
     from: deployer,
     log: true,
     waitConfirmations: network.config.blockConfirmations || 1,

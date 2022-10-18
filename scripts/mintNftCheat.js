@@ -1,28 +1,25 @@
 const { getNamedAccounts, ethers } = require("hardhat");
 
 async function main() {
-  const { deployer } = await getNamedAccounts();
-  const hardhatBasicsNFT = await ethers.getContractAt(
-    "HardhatBasicsNFT",
-    "0xB29eA9ad260B6DC980513bbA29051570b2115110",
+  const accounts = await ethers.getSigners();
+  const deployer = accounts[0];
+
+  const courseCompletedNFT = await ethers.getContractAt(
+    "CourseCompletedNFT",
+    "0x9E9a4e58dDc9483d241AfC9a028E89BD9b9fa683",
     deployer
   );
-  console.log("Connected to the contract!");
+  console.log("Connected to CourseCompletedNFT contract!");
 
-  const response = await ethers.provider.getStorageAt(
-    hardhatBasicsNFT.address,
-    777
-  );
+  console.log("Deploying Attacker contract...");
+  await deployments.fixture("all");
+  const attacker = await ethers.getContract("Attacker", deployer);
 
-  console.log(`1. Location 777: ${response}`);
-
-  const transactionResponse = await hardhatBasicsNFT.mintNft(response);
-
-  const secondResponse = await ethers.provider.getStorageAt(
-    hardhatBasicsNFT.address,
-    777
-  );
-  console.log(`2. Location 777: ${secondResponse}`);
+  console.log("Sending mintNft transaction...");
+  const selector = await attacker.getSelector();
+  const attackTx = await courseCompletedNFT.mintNft(attacker.address, selector);
+  attackTx.wait(1);
+  console.log("Minted!");
 }
 
 // Call th main function and log errors if any occur
